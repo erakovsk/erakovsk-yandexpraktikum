@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container">
+    <div class="row text-center mt5">
+        <img alt="Logo" src="./images/yandex.png" height="100">
+    </div>
+    <div class="row mt5">
+        <div class="col-md-4 col-md-offset-4 text-center">
+            <form id="calculation">
+                <div class="form-group">
+                    Возраст
+                    <input type="number" required class="form-control" name="Age" value="18" min="0" step="1" placeholder="Введите ваш возраст" />
+                </div>
+                <div class="form-group">
+                    <label class="col-6">Я мужчина
+                        <input type="radio" name="Sex" value="0" checked class="form-control" />
+                    </label>
+                    <label class="col-6">Я женщина
+                        <input type="radio" name="Sex" value="1" class="form-control" />
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Источник дохода:
+                        <select name="IncomeType" class="form-control">
+                            <option value="0">Пассивный доход</option>
+                            <option value="1">Наемный работник</option>
+                            <option value="2">Собственный бизнес</option>
+                            <option value="3" selected>Безработный</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-group">
+                    Доход
+                    <input type="number" name="Income" value="1" required step="1" class="form-control" placeholder="Доход за последний год, млн" />
+                </div>
+                <div class="form-group">
+                    <label>Кредитный рейтинг:
+                        <select name="CreditRate" class="form-control">
+                            <option value="-2">-2</option>
+                            <option value="-1">-1</option>
+                            <option value="0" selected>0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-group">
+                    Сумма
+                    <input type="number" name="RequestedSum" value="5" required class="form-control" min="0.1" step="0.1" max="10" placeholder="Запрошенная сумма, млн" />
+                </div>
+                <div class="form-group">
+                    Срок
+                    <input type="number" name="Term" value="5" required class="form-control" min="1" step="1" max="20" placeholder="Срок погашения, лет" />
+                </div>
+                <div class="form-group">
+                    <label>Цель:
+                        <select name="Reason" class="form-control">
+                            <option value="0">ипотека</option>
+                            <option value="1">развитие бизнеса</option>
+                            <option value="2">автокредит</option>
+                            <option value="3" selected>потребительский</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-success" type="submit">Отправить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4 text-center">
+            <h3>Предварительное решение:</h3>
+            <p id="response">не запрашивалось</p>
+        </div>
+    </div>
+    <hr>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function(){
+            $("#calculation").submit(function() {
+                getResult();
+                return false;
+            })
+        });
+
+        function getResult() {
+            $.ajax({
+                url:'/Home/Calculate',
+                type:'post',
+                data: {
+                    request: getFormData("calculation")
+                },
+                dataType:"json",
+                success: function(response) {
+                    console.log(response);
+                    var result = (response.Result) ? 'Одобрить' : 'Отклонить';
+                    $("#response").text(result + ", Платеж: " + response.Payment + "M; " + "Ошибка(" + response.Error + "): " + response.ErrorMessage);
+                }
+            })
+        }
+
+        function getFormData(name){
+            var data = $("#" + name).serializeArray();
+            var str = JSON.stringify(data);
+            return str;
+        }
+    </script>
+}
